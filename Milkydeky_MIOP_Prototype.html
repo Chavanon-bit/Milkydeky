@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Milkydeky Integrated Operations Platform (MIOP)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-deep: #1b4332;
+    --green-mid:  #2d6a4f;
+    --green-light:#52b788;
+    --green-pale: #d8f3dc;
+    --cream:      #f8f4ee;
+    --cream-dark: #ede8df;
+    --amber:      #e9c46a;
+    --amber-dark: #c89a2a;
+    --red:        #c1121f;
+    --red-pale:   #ffe5e5;
+    --blue:       #264653;
+    --text-dark:  #1a1a1a;
+    --text-mid:   #4a5568;
+    --text-light: #718096;
+    --white:      #ffffff;
+    --shadow:     0 4px 24px rgba(27,67,50,0.10);
+    --shadow-sm:  0 2px 8px rgba(27,67,50,0.08);
+    --radius:     12px;
+    --radius-sm:  8px;
+    --sidebar-w:  240px;
+    --header-h:   64px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  /* ─── HEADER ─────────────────────────── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h);
+    background: var(--green-deep);
+    display: flex; align-items: center; padding: 0 24px;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--white);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon { font-size: 28px; }
+  .logo-sub { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--green-pale); font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+  .role-badge {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 13px; color: var(--green-pale); font-weight: 500;
+  }
+  .role-badge span { color: var(--amber); }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--green-light); display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: var(--white); cursor: pointer;
+  }
+  /* ─── LAYOUT ─────────────────────────── */
+  .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+  /* ─── SIDEBAR ────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    background: var(--white); border-right: 1px solid var(--cream-dark);
+    position: fixed; top: var(--header-h); bottom: 0; left: 0;
+    overflow-y: auto; padding: 16px 0;
+    display: flex; flex-direction: column;
+  }
+  .nav-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--text-light); padding: 12px 20px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 20px; cursor: pointer;
+    font-size: 14px; font-weight: 500; color: var(--text-mid);
+    border-left: 3px solid transparent;
+    transition: all 0.18s ease;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--green-pale); color: var(--green-deep); }
+  .nav-item.active {
+    background: var(--green-pale); color: var(--green-deep);
+    border-left-color: var(--green-mid); font-weight: 600;
+  }
+  .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+  .nav-divider { height: 1px; background: var(--cream-dark); margin: 12px 0; }
+  /* ─── MAIN CONTENT ───────────────────── */
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; max-width: 1100px; }
+  /* ─── SCREENS ────────────────────────── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.22s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  /* ─── PAGE HEADER ────────────────────── */
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--green-deep); }
+  .page-header p { color: var(--text-light); font-size: 14px; margin-top: 4px; }
+  .breadcrumb { font-size: 12px; color: var(--text-light); margin-bottom: 8px; }
+  .breadcrumb span { color: var(--green-mid); cursor: pointer; }
+  .breadcrumb span:hover { text-decoration: underline; }
+  /* ─── CARDS ──────────────────────────── */
+  .card {
+    background: var(--white); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); padding: 24px;
+    border: 1px solid var(--cream-dark);
+  }
+  .card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--green-deep); margin-bottom: 4px; }
+  .card-subtitle { font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+  /* ─── STAT CARDS ─────────────────────── */
+  .stat-card {
+    background: var(--white); border-radius: var(--radius);
+    padding: 20px; border: 1px solid var(--cream-dark);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat-icon { font-size: 24px; }
+  .stat-label { font-size: 12px; color: var(--text-light); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--green-deep); line-height: 1; }
+  .stat-delta { font-size: 12px; color: var(--green-light); font-weight: 500; }
+  .stat-delta.down { color: var(--red); }
+  /* ─── BUTTONS ────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    border: none; transition: all 0.18s ease; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary { background: var(--green-mid); color: var(--white); }
+  .btn-primary:hover { background: var(--green-deep); }
+  .btn-secondary { background: var(--cream-dark); color: var(--text-dark); }
+  .btn-secondary:hover { background: var(--cream); border: 1px solid var(--green-light); }
+  .btn-danger { background: var(--red); color: var(--white); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--green-mid); color: var(--green-mid); }
+  .btn-outline:hover { background: var(--green-pale); }
+  .btn-amber { background: var(--amber); color: var(--green-deep); }
+  .btn-amber:hover { background: var(--amber-dark); color: var(--white); }
+  .btn-sm { padding: 7px 14px; font-size: 13px; }
+  .btn-lg { padding: 13px 28px; font-size: 15px; }
+  /* ─── FORMS ──────────────────────────── */
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-mid); margin-bottom: 6px; }
+  .form-label .req { color: var(--red); margin-left: 3px; }
+  .form-control {
+    width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--cream-dark); font-size: 14px;
+    font-family: 'DM Sans', sans-serif; background: var(--white);
+    color: var(--text-dark); transition: border 0.15s;
+    outline: none;
+  }
+  .form-control:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(82,183,136,0.15); }
+  .form-control.error { border-color: var(--red); background: var(--red-pale); }
+  .form-hint { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+  .form-error { font-size: 12px; color: var(--red); margin-top: 4px; font-weight: 500; display: none; }
+  .form-error.show { display: block; }
+  select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 36px; }
+  textarea.form-control { resize: vertical; min-height: 80px; }
+  .checkbox-group { display: flex; align-items: center; gap: 10px; }
+  .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green-mid); cursor: pointer; }
+  .checkbox-group label { font-size: 14px; color: var(--text-dark); cursor: pointer; }
+  /* ─── STEPS WIZARD ───────────────────── */
+  .wizard-steps {
+    display: flex; align-items: center; margin-bottom: 32px;
+    background: var(--white); border-radius: var(--radius);
+    padding: 20px 24px; border: 1px solid var(--cream-dark);
+    gap: 0;
+  }
+  .step-item { flex: 1; display: flex; align-items: center; }
+  .step-circle {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    border: 2px solid var(--cream-dark); background: var(--white); color: var(--text-light);
+  }
+  .step-item.done .step-circle { background: var(--green-light); border-color: var(--green-light); color: var(--white); }
+  .step-item.active .step-circle { background: var(--green-mid); border-color: var(--green-mid); color: var(--white); }
+  .step-label { margin-left: 10px; }
+  .step-label-title { font-size: 13px; font-weight: 600; color: var(--text-mid); }
+  .step-item.active .step-label-title { color: var(--green-deep); }
+  .step-label-sub { font-size: 11px; color: var(--text-light); }
+  .step-connector { flex: 1; height: 2px; background: var(--cream-dark); margin: 0 12px; }
+  .step-item.done + .step-item .step-connector,
+  .step-connector.done { background: var(--green-light); }
+  /* ─── TABLES ─────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--green-deep); }
+  thead th { padding: 12px 16px; text-align: left; font-weight: 600; font-size: 12px; color: var(--green-pale); text-transform: uppercase; letter-spacing: 0.8px; }
+  tbody tr { border-bottom: 1px solid var(--cream-dark); transition: background 0.1s; }
+  tbody tr:hover { background: var(--green-pale); }
+  tbody td { padding: 12px 16px; color: var(--text-dark); }
+  /* ─── BADGES / PILLS ─────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-red   { background: #fee2e2; color: #991b1b; }
+  .badge-blue  { background: #dbeafe; color: #1e40af; }
+  .badge-gray  { background: #f3f4f6; color: #4b5563; }
+  .badge-purple{ background: #ede9fe; color: #5b21b6; }
+  /* ─── ALERTS ─────────────────────────── */
+  .alert {
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    font-size: 14px; display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; }
+  .alert-warning { background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; }
+  .alert-error   { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+  .alert-info    { background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; }
+  /* ─── MISC ───────────────────────────── */
+  .flex { display: flex; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .flex-end { display: flex; justify-content: flex-end; gap: 12px; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-20 { margin-top: 20px; }
+  .mt-24 { margin-top: 24px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .text-small { font-size: 13px; }
+  .text-muted { color: var(--text-light); }
+  .fw-600 { font-weight: 600; }
+  .hr { height: 1px; background: var(--cream-dark); margin: 20px 0; }
+  .tag {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  }
+  .tag-type { background: var(--green-pale); color: var(--green-deep); }
+  .action-row { display: flex; gap: 8px; }
+  .cow-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--cream-dark); background: var(--white);
+    cursor: pointer; transition: all 0.18s;
+  }
+  .cow-card:hover { border-color: var(--green-light); background: var(--green-pale); }
+  .cow-card.selected { border-color: var(--green-mid); background: var(--green-pale); box-shadow: 0 0 0 3px rgba(82,183,136,0.2); }
+  .cow-avatar {
+    width: 48px; height: 48px; border-radius: 50%; background: var(--green-deep);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    flex-shrink: 0;
+  }
+  .production-stage {
+    display: flex; align-items: center; padding: 14px 16px;
+    border-radius: var(--radius-sm); border: 1.5px solid var(--cream-dark);
+    gap: 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .production-stage:hover { border-color: var(--amber); background: #fffbeb; }
+  .production-stage.current { border-color: var(--green-mid); background: var(--green-pale); }
+  .stage-num { width: 30px; height: 30px; border-radius: 50%; background: var(--green-mid); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .progress-bar-wrap { background: var(--cream-dark); border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--green-light), var(--green-mid)); border-radius: 99px; transition: width 0.4s ease; }
+  .confirmation-box {
+    text-align: center; padding: 32px;
+    background: linear-gradient(135deg, var(--green-pale), #f0fdf4);
+    border: 2px solid var(--green-light); border-radius: var(--radius);
+  }
+  .confirmation-icon { font-size: 56px; margin-bottom: 16px; }
+  .confirmation-box h2 { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--green-deep); margin-bottom: 8px; }
+  .confirmation-box p { color: var(--text-mid); font-size: 14px; }
+  .ref-number { display: inline-block; background: var(--green-deep); color: var(--white); padding: 4px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; letter-spacing: 1px; margin: 12px 0; }
+  .summary-list { background: var(--white); border-radius: var(--radius-sm); border: 1px solid var(--cream-dark); overflow: hidden; }
+  .summary-row { display: flex; padding: 11px 16px; border-bottom: 1px solid var(--cream-dark); font-size: 14px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .key { font-weight: 600; color: var(--text-mid); width: 180px; flex-shrink: 0; }
+  .summary-row .val { color: var(--text-dark); }
+  .machine-alert { background: var(--red-pale); border: 1.5px solid #fca5a5; border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; gap: 12px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }
+  .machine-alert-icon { font-size: 22px; }
+  .stock-meter { background: var(--cream-dark); border-radius: 4px; height: 12px; overflow: hidden; }
+  .stock-fill { height: 100%; border-radius: 4px; }
+  .stock-ok { background: var(--green-light); }
+  .stock-warn { background: var(--amber); }
+  .stock-low { background: var(--red); }
+  .animal-profile-card {
+    border: 1.5px solid var(--cream-dark); border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; transition: all 0.18s; background: var(--white);
+  }
+  .animal-profile-card:hover { border-color: var(--green-light); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .profile-header { background: var(--green-deep); padding: 16px; display: flex; align-items: center; gap: 14px; }
+  .profile-avatar { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .profile-name { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--white); }
+  .profile-id { font-size: 12px; color: var(--green-pale); }
+  .profile-body { padding: 16px; }
+  .health-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .health-excellent { background: #d1fae5; color: #065f46; }
+  .health-good { background: #dbeafe; color: #1e40af; }
+  .health-monitor { background: #fef3c7; color: #92400e; }
+  .health-critical { background: #fee2e2; color: #991b1b; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: var(--radius); max-width: 480px; width: 90%; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--green-deep); margin-bottom: 8px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--cream-dark); margin-bottom: 24px; }
+  .tab { padding: 10px 20px; font-size: 14px; font-weight: 500; color: var(--text-light); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+  .tab:hover { color: var(--green-mid); }
+  .tab.active { color: var(--green-deep); border-bottom-color: var(--green-mid); font-weight: 700; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .info-block { background: var(--green-pale); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px; }
+  .info-block-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--green-mid); margin-bottom: 4px; }
+  .info-block-value { font-size: 15px; font-weight: 600; color: var(--green-deep); }
+  /* ─── DASHBOARD ───────────────────────── */
+  .welcome-banner {
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 100%);
+    border-radius: var(--radius); padding: 28px 32px; color: var(--white);
+    margin-bottom: 24px; position: relative; overflow: hidden;
+  }
+  .welcome-banner::before {
+    content: '🐄'; position: absolute; right: 32px; top: 50%; transform: translateY(-50%);
+    font-size: 80px; opacity: 0.15;
+  }
+  .welcome-banner h1 { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .welcome-banner p { font-size: 14px; color: rgba(255,255,255,0.75); }
+  .module-card {
+    background: var(--white); border-radius: var(--radius); padding: 24px;
+    border: 1px solid var(--cream-dark); cursor: pointer;
+    transition: all 0.2s; display: flex; flex-direction: column; gap: 12px;
+  }
+  .module-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); border-color: var(--green-light); }
+  .module-icon { font-size: 32px; }
+  .module-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--green-deep); }
+  .module-desc { font-size: 13px; color: var(--text-light); line-height: 1.5; }
+  .module-actor { font-size: 12px; font-weight: 600; color: var(--green-mid); }
+  .recent-activity { font-size: 13px; }
+  .activity-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; margin-top: 4px; }
+  .activity-time { color: var(--text-light); font-size: 12px; margin-top: 2px; }
+  /* Storage tank visual */
+  .tank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tank-item { background: var(--cream); border-radius: var(--radius-sm); padding: 14px; text-align: center; cursor: pointer; border: 1.5px solid var(--cream-dark); transition: all 0.15s; }
+  .tank-item:hover { border-color: var(--green-light); background: var(--green-pale); }
+  .tank-item.selected { border-color: var(--green-mid); background: var(--green-pale); box-shadow: 0 0 0 3px rgba(82,183,136,0.2); }
+  .tank-item.full { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+  .tank-visual { font-size: 28px; margin-bottom: 6px; }
+  .tank-id { font-size: 13px; font-weight: 700; color: var(--green-deep); }
+  .tank-cap { font-size: 11px; color: var(--text-light); }
+  .tank-status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-top: 4px; }
+  .tank-available { background: #d1fae5; color: #065f46; }
+  .tank-partial { background: #fef3c7; color: #92400e; }
+  .tank-full { background: #fee2e2; color: #991b1b; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ HEADER ════════════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">🐄</span>
+    <div>
+      <div>Milkydeky</div>
+      <div class="logo-sub">Integrated Operations Platform</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="role-badge" id="headerRole">Role: <span>Farm Worker</span></div>
+    <div class="avatar" id="headerAvatar" title="User Profile">FW</div>
+  </div>
+</header>
+
+<!-- ═══════ LAYOUT ════════════════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-item active" data-nav="dashboard" onclick="navigate('dashboard')">
+      <span class="nav-icon">🏠</span> Dashboard
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-section-label">Use Case 1</div>
+    <div class="nav-item" data-nav="harvest-home" onclick="navigate('harvest-home')">
+      <span class="nav-icon">🥛</span> Manage Harvesting
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-section-label">Use Case 2</div>
+    <div class="nav-item" data-nav="production-home" onclick="navigate('production-home')">
+      <span class="nav-icon">🏭</span> Dairy &amp; Meat Operations
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-section-label">Use Case 3</div>
+    <div class="nav-item" data-nav="animal-home" onclick="navigate('animal-home')">
+      <span class="nav-icon">🐮</span> Manage Animal Care
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-section-label">Administration</div>
+    <div class="nav-item" onclick="showMsg('Admin panel is restricted to System Administrators.')">
+      <span class="nav-icon">⚙️</span> System Admin
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- ════════════════════════════════════════════════════════════
+         DASHBOARD
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="screen-dashboard" class="screen active">
+      <div class="welcome-banner">
+        <h1>Good Morning, Farm Worker 👋</h1>
+        <p>Monday, 14 April 2026 &nbsp;|&nbsp; Milkydeky Farm &mdash; Kanchanaburi, Thailand</p>
+      </div>
+
+      <div class="grid-4 mb-20">
+        <div class="stat-card">
+          <div class="stat-icon">🐄</div>
+          <div class="stat-label">Total Animals</div>
+          <div class="stat-value">248</div>
+          <div class="stat-delta">↑ 3 new this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🥛</div>
+          <div class="stat-label">Today's Milk (L)</div>
+          <div class="stat-value">3,420</div>
+          <div class="stat-delta">↑ +180L vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🥩</div>
+          <div class="stat-label">Meat Batches</div>
+          <div class="stat-value">12</div>
+          <div class="stat-delta">↑ 2 ready today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-label">Active Alerts</div>
+          <div class="stat-value" style="color:var(--red)">2</div>
+          <div class="stat-delta down">Needs attention</div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="module-card" onclick="navigate('harvest-home')">
+          <div class="module-icon">🥛</div>
+          <div class="module-title">Manage Harvesting</div>
+          <div class="module-actor">👤 Farm Worker</div>
+          <div class="module-desc">Record milk &amp; meat harvests, verify cow readiness, log storage transfers, and quality checks.</div>
+          <button class="btn btn-primary btn-sm mt-12">Open Module →</button>
+        </div>
+        <div class="module-card" onclick="navigate('production-home')">
+          <div class="module-icon">🏭</div>
+          <div class="module-title">Dairy &amp; Meat Operations</div>
+          <div class="module-actor">👤 Production Floor Staff</div>
+          <div class="module-desc">Track production batches, monitor raw stock, receive machine alerts, and count finished products.</div>
+          <button class="btn btn-primary btn-sm mt-12">Open Module →</button>
+        </div>
+        <div class="module-card" onclick="navigate('animal-home')">
+          <div class="module-icon">🐮</div>
+          <div class="module-title">Manage Animal Care</div>
+          <div class="module-actor">👤 Veterinarian</div>
+          <div class="module-desc">Create animal profiles, record health checks, AI records, pregnancy confirmations, and slaughter eligibility.</div>
+          <button class="btn btn-primary btn-sm mt-12">Open Module →</button>
+        </div>
+      </div>
+
+      <div class="card mt-24">
+        <div class="flex-between mb-16">
+          <div class="card-title">Recent Activity</div>
+          <span class="text-small text-muted">Today</span>
+        </div>
+        <div class="recent-activity">
+          <div class="activity-item"><div class="activity-dot"></div><div><div>Cow <strong>C-0042</strong> milk yield recorded — 28.4 L</div><div class="activity-time">07:32 AM &nbsp;·&nbsp; Farm Worker Somchai</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--amber)"></div><div><div>Pasteurizer <strong>M-03</strong> fault alert triggered</div><div class="activity-time">06:55 AM &nbsp;·&nbsp; System Alert</div></div></div>
+          <div class="activity-item"><div class="activity-dot"></div><div><div>Animal profile created: <strong>C-0248</strong> (Dairy calf)</div><div class="activity-time">06:10 AM &nbsp;·&nbsp; Vet Dr. Pranee</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--red)"></div><div><div>Meat batch <strong>MB-2026-041</strong> flagged — defective portions detected</div><div class="activity-time">Yesterday 16:45 PM</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         USE CASE 1: MANAGE HARVESTING
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- UC1 Home -->
+    <section id="screen-harvest-home" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / Manage Harvesting</div>
+        <h1>Manage Harvesting</h1>
+        <p>Record raw milk &amp; meat yields, verify cow readiness, and log storage transfers.</p>
+      </div>
+
+      <div class="flex-between mb-20">
+        <div class="flex gap-8">
+          <button class="btn btn-primary" onclick="navigate('harvest-step1')">+ New Milk Harvest</button>
+          <button class="btn btn-outline" onclick="navigate('harvest-meat-step1')">+ New Meat Harvest</button>
+        </div>
+        <select class="form-control" style="width:160px" onchange="filterHarvestTable(this.value)">
+          <option value="all">All Types</option>
+          <option value="milk">Milk Only</option>
+          <option value="meat">Meat Only</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="card-title mb-16">Recent Harvest Records</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Harvest ID</th><th>Type</th><th>Cow ID</th><th>Date &amp; Time</th>
+              <th>Volume / Yield</th><th>Storage</th><th>Quality</th><th>Status</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><strong>HV-2026-089</strong></td><td><span class="tag tag-type">Milk</span></td><td>C-0042</td><td>14 Apr 07:30</td><td>28.4 L</td><td>Tank T-01</td><td><span class="badge badge-green">Passed</span></td><td><span class="badge badge-green">Logged</span></td></tr>
+              <tr><td><strong>HV-2026-088</strong></td><td><span class="tag tag-type">Milk</span></td><td>C-0017</td><td>14 Apr 07:15</td><td>31.0 L</td><td>Tank T-02</td><td><span class="badge badge-green">Passed</span></td><td><span class="badge badge-green">Logged</span></td></tr>
+              <tr><td><strong>HV-2026-087</strong></td><td><span class="tag" style="background:#fce7f3;color:#9d174d">Meat</span></td><td>C-0103</td><td>13 Apr 14:00</td><td>340 kg</td><td>Cold Room CR-2</td><td><span class="badge badge-amber">Pending</span></td><td><span class="badge badge-amber">In Progress</span></td></tr>
+              <tr><td><strong>HV-2026-086</strong></td><td><span class="tag tag-type">Milk</span></td><td>C-0059</td><td>13 Apr 07:00</td><td>25.8 L</td><td>Tank T-03</td><td><span class="badge badge-green">Passed</span></td><td><span class="badge badge-green">Logged</span></td></tr>
+              <tr><td><strong>HV-2026-085</strong></td><td><span class="tag" style="background:#fce7f3;color:#9d174d">Meat</span></td><td>C-0089</td><td>12 Apr 15:30</td><td>290 kg</td><td>Cold Room CR-1</td><td><span class="badge badge-red">Failed</span></td><td><span class="badge badge-red">Flagged</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Milk Step 1: Cow ID Verification -->
+    <section id="screen-harvest-step1" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Milk Harvest</div>
+        <h1>New Milk Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item active"><div class="step-circle">1</div><div class="step-label"><div class="step-label-title">Verify Cow</div><div class="step-label-sub">Check readiness</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Batch Details</div><div class="step-label-sub">Volume &amp; filtration</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Storage</div><div class="step-label-sub">Assign tank</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div><div class="step-label-sub">Save record</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Step 1: Verify Cow ID</div>
+        <div class="card-subtitle">Scan or enter the Cow ID to check harvesting readiness from the Cow Database.</div>
+        <div class="form-group">
+          <label class="form-label">Cow ID <span class="req">*</span></label>
+          <div class="flex gap-8">
+            <input class="form-control" id="cowIdInput" placeholder="e.g. C-0042 or scan barcode…" style="max-width:320px"/>
+            <button class="btn btn-primary" onclick="verifyCow()">Verify →</button>
+          </div>
+          <div class="form-hint">📷 Tap scan icon on mobile to use camera barcode scanner.</div>
+          <div class="form-error" id="cowIdError">⚠️ Cow ID not found or not ready for milking. Please check the ID.</div>
+        </div>
+
+        <div id="cowVerifiedCard" style="display:none">
+          <div class="alert alert-success">
+            <span class="alert-icon">✅</span>
+            <div><strong>Cow Verified — Ready for Milking</strong><br>Animal data retrieved from Cow Database.</div>
+          </div>
+          <div class="grid-3 mt-12">
+            <div class="info-block"><div class="info-block-label">Cow ID</div><div class="info-block-value">C-0042</div></div>
+            <div class="info-block"><div class="info-block-label">Type</div><div class="info-block-value">🐄 Dairy Cow</div></div>
+            <div class="info-block"><div class="info-block-label">Health Status</div><div class="info-block-value">✅ Excellent</div></div>
+            <div class="info-block"><div class="info-block-label">Last Milked</div><div class="info-block-value">13 Apr 2026, 07:20</div></div>
+            <div class="info-block"><div class="info-block-label">Avg. Daily Yield</div><div class="info-block-value">28.2 L</div></div>
+            <div class="info-block"><div class="info-block-label">Pregnancy Status</div><div class="info-block-value">Not pregnant</div></div>
+          </div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-home')">Cancel</button>
+          <button class="btn btn-primary" id="step1Next" onclick="navigate('harvest-step2')" disabled>Next: Batch Details →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Milk Step 2: Batch Details -->
+    <section id="screen-harvest-step2" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Milk Harvest</div>
+        <h1>New Milk Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Verify Cow</div><div class="step-label-sub">C-0042</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Batch Details</div><div class="step-label-sub">Volume &amp; filtration</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Storage</div><div class="step-label-sub">Assign tank</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div><div class="step-label-sub">Save record</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 2: Record Batch Details</div>
+        <div class="card-subtitle">Enter milk volume, collection time, and filtration information.</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Total Batch Volume (Litres) <span class="req">*</span></label>
+            <input class="form-control" type="number" placeholder="e.g. 28.4" id="milkVolume" min="0" step="0.1"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Collection Date &amp; Time <span class="req">*</span></label>
+            <input class="form-control" type="datetime-local" value="2026-04-14T07:30"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Filtration Method <span class="req">*</span></label>
+            <select class="form-control">
+              <option value="">-- Select --</option>
+              <option selected>Standard Mesh Filter</option>
+              <option>Membrane Filtration</option>
+              <option>Centrifugal Separation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Filtration Status</label>
+            <select class="form-control">
+              <option>Completed</option>
+              <option>Pending</option>
+              <option>Skipped (Emergency)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Additional Notes</label>
+          <textarea class="form-control" placeholder="Optional: any unusual observations during collection…"></textarea>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-step1')">← Back</button>
+          <button class="btn btn-primary" onclick="navigate('harvest-step3')">Next: Select Storage →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Milk Step 3: Storage Selection -->
+    <section id="screen-harvest-step3" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Milk Harvest</div>
+        <h1>New Milk Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Verify Cow</div><div class="step-label-sub">C-0042</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Batch Details</div><div class="step-label-sub">28.4 L</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Storage</div><div class="step-label-sub">Assign tank</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div><div class="step-label-sub">Save record</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 3: Select Storage Tank</div>
+        <div class="card-subtitle">Choose an available chilled storage tank. Full tanks are not selectable.</div>
+        <div class="alert alert-info"><span class="alert-icon">ℹ️</span>Batch volume: <strong>28.4 L</strong>. Select a tank with sufficient remaining capacity.</div>
+        <div class="tank-grid" id="tankGrid">
+          <div class="tank-item" onclick="selectTank(this,'T-01')"><div class="tank-visual">🛢️</div><div class="tank-id">Tank T-01</div><div class="tank-cap">Cap: 500L &nbsp;|&nbsp; Used: 120L</div><div class="tank-status tank-available">Available</div></div>
+          <div class="tank-item" onclick="selectTank(this,'T-02')"><div class="tank-visual">🛢️</div><div class="tank-id">Tank T-02</div><div class="tank-cap">Cap: 500L &nbsp;|&nbsp; Used: 390L</div><div class="tank-status tank-partial">Partial</div></div>
+          <div class="tank-item full"><div class="tank-visual">🛢️</div><div class="tank-id">Tank T-03</div><div class="tank-cap">Cap: 500L &nbsp;|&nbsp; Used: 500L</div><div class="tank-status tank-full">Full</div></div>
+          <div class="tank-item" onclick="selectTank(this,'T-04')"><div class="tank-visual">🛢️</div><div class="tank-id">Tank T-04</div><div class="tank-cap">Cap: 1000L &nbsp;|&nbsp; Used: 0L</div><div class="tank-status tank-available">Available</div></div>
+          <div class="tank-item" onclick="selectTank(this,'T-05')"><div class="tank-visual">🛢️</div><div class="tank-id">Tank T-05</div><div class="tank-cap">Cap: 1000L &nbsp;|&nbsp; Used: 450L</div><div class="tank-status tank-partial">Partial</div></div>
+          <div class="tank-item full"><div class="tank-visual">🛢️</div><div class="tank-id">Tank T-06</div><div class="tank-cap">Cap: 500L &nbsp;|&nbsp; Used: 500L</div><div class="tank-status tank-full">Full</div></div>
+        </div>
+        <div class="alert alert-warning mt-20" id="tankWarning" style="display:none">
+          <span class="alert-icon">⚠️</span><div>Tank T-03 is <strong>full</strong>. The system has suggested an alternative. Please select another tank.</div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-step2')">← Back</button>
+          <button class="btn btn-primary" id="storageNext" onclick="navigate('harvest-step4')" disabled>Next: Review &amp; Confirm →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Milk Step 4: Confirm -->
+    <section id="screen-harvest-step4" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Milk Harvest</div>
+        <h1>New Milk Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Verify Cow</div><div class="step-label-sub">C-0042</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Batch Details</div><div class="step-label-sub">28.4 L</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Storage</div><div class="step-label-sub">Tank T-01</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div><div class="step-label-sub">Save record</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 4: Review &amp; Confirm</div>
+        <div class="card-subtitle">Verify all details before saving to the Raw Material Database.</div>
+        <div class="summary-list">
+          <div class="summary-row"><span class="key">Harvest Type</span><span class="val">🥛 Milk</span></div>
+          <div class="summary-row"><span class="key">Cow ID</span><span class="val">C-0042</span></div>
+          <div class="summary-row"><span class="key">Cow Health Status</span><span class="val"><span class="badge badge-green">Excellent</span></span></div>
+          <div class="summary-row"><span class="key">Batch Volume</span><span class="val">28.4 Litres</span></div>
+          <div class="summary-row"><span class="key">Collection Time</span><span class="val">14 Apr 2026 — 07:30 AM</span></div>
+          <div class="summary-row"><span class="key">Filtration Method</span><span class="val">Standard Mesh Filter</span></div>
+          <div class="summary-row"><span class="key">Filtration Status</span><span class="val">Completed</span></div>
+          <div class="summary-row"><span class="key">Assigned Storage</span><span class="val">Tank T-01 (Available, 120L used)</span></div>
+          <div class="summary-row"><span class="key">Recorded By</span><span class="val">Farm Worker — Somchai W.</span></div>
+        </div>
+        <div class="form-group mt-20">
+          <div class="checkbox-group">
+            <input type="checkbox" id="confirmCheck" onchange="toggleSaveBtn()"/>
+            <label for="confirmCheck">I confirm that all information above is accurate and complete.</label>
+          </div>
+        </div>
+        <div class="flex-end mt-12">
+          <button class="btn btn-secondary" onclick="navigate('harvest-step3')">← Back</button>
+          <button class="btn btn-primary btn-lg" id="saveHarvestBtn" onclick="saveHarvest()" disabled>💾 Save to Raw Material Database</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Milk Saved Confirmation -->
+    <section id="screen-harvest-saved" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span></div>
+        <h1>Harvest Record Saved</h1>
+      </div>
+      <div class="card">
+        <div class="confirmation-box">
+          <div class="confirmation-icon">✅</div>
+          <h2>Harvest Successfully Logged!</h2>
+          <p>The raw milk record has been saved to the Raw Material Database.</p>
+          <div class="ref-number">HV-2026-090</div>
+          <p style="margin-top:8px">Raw materials are officially logged and ready for production.</p>
+        </div>
+        <div class="summary-list mt-20">
+          <div class="summary-row"><span class="key">Harvest ID</span><span class="val"><strong>HV-2026-090</strong></span></div>
+          <div class="summary-row"><span class="key">Cow</span><span class="val">C-0042</span></div>
+          <div class="summary-row"><span class="key">Volume</span><span class="val">28.4 L → Tank T-01</span></div>
+          <div class="summary-row"><span class="key">Saved At</span><span class="val">14 Apr 2026, 07:45 AM</span></div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-home')">Back to Harvesting</button>
+          <button class="btn btn-primary" onclick="navigate('harvest-step1')">+ New Harvest</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Meat Harvest Step 1 -->
+    <section id="screen-harvest-meat-step1" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Meat Harvest</div>
+        <h1>New Meat Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item active"><div class="step-circle">1</div><div class="step-label"><div class="step-label-title">Health Check</div><div class="step-label-sub">Vet assessment</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Yield Entry</div><div class="step-label-sub">Kg &amp; defects</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Cold Storage</div><div class="step-label-sub">Transfer log</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div><div class="step-label-sub">Save record</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 1: Retrieve Health Assessment</div>
+        <div class="card-subtitle">Enter the Cow ID to retrieve veterinarian's slaughter eligibility decision from the Cow Database.</div>
+        <div class="form-group">
+          <label class="form-label">Cow ID <span class="req">*</span></label>
+          <div class="flex gap-8">
+            <input class="form-control" placeholder="e.g. C-0103" id="meatCowId" style="max-width:320px"/>
+            <button class="btn btn-primary" onclick="verifyMeatCow()">Retrieve Assessment →</button>
+          </div>
+        </div>
+        <div id="meatCowCard" style="display:none">
+          <div class="alert alert-success"><span class="alert-icon">✅</span><div><strong>Slaughter Eligible</strong> — Veterinarian has approved this animal for processing.</div></div>
+          <div class="grid-3 mt-12">
+            <div class="info-block"><div class="info-block-label">Cow ID</div><div class="info-block-value">C-0103</div></div>
+            <div class="info-block"><div class="info-block-label">Type</div><div class="info-block-value">🥩 Meat Cow</div></div>
+            <div class="info-block"><div class="info-block-label">Weight</div><div class="info-block-value">580 kg</div></div>
+            <div class="info-block"><div class="info-block-label">Health Status</div><div class="info-block-value">✅ Good</div></div>
+            <div class="info-block"><div class="info-block-label">Vet Assessment</div><div class="info-block-value">Eligible</div></div>
+            <div class="info-block"><div class="info-block-label">Approved By</div><div class="info-block-value">Dr. Pranee S.</div></div>
+          </div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-home')">Cancel</button>
+          <button class="btn btn-primary" id="meatStep1Next" onclick="navigate('harvest-meat-step2')" disabled>Next: Enter Yield →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Meat Step 2 -->
+    <section id="screen-harvest-meat-step2" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Meat Harvest</div>
+        <h1>New Meat Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Health Check</div><div class="step-label-sub">C-0103 Eligible</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Yield Entry</div><div class="step-label-sub">Kg &amp; defects</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Cold Storage</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 2: Record Meat Yield</div>
+        <div class="card-subtitle">Enter yield weight, flag any defective portions, and log harvest details.</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Total Meat Yield (kg) <span class="req">*</span></label>
+            <input class="form-control" type="number" placeholder="e.g. 340" min="0"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Harvest Date &amp; Time <span class="req">*</span></label>
+            <input class="form-control" type="datetime-local" value="2026-04-14T14:00"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Defective Portions (kg)</label>
+            <input class="form-control" type="number" placeholder="0" min="0" step="0.1"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Defect Type</label>
+            <select class="form-control">
+              <option value="">None</option>
+              <option>Bruising</option>
+              <option>Contamination</option>
+              <option>Abnormal Colour</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="flagDefect"/>
+            <label for="flagDefect">Flag defective portions for quality inspection review</label>
+          </div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-meat-step1')">← Back</button>
+          <button class="btn btn-primary" onclick="navigate('harvest-meat-step3')">Next: Cold Storage →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC1 Meat Step 3: Cold Storage -->
+    <section id="screen-harvest-meat-step3" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('harvest-home')">Harvesting</span> / New Meat Harvest</div>
+        <h1>New Meat Harvest</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Health Check</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Yield Entry</div><div class="step-label-sub">340 kg</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Cold Storage</div><div class="step-label-sub">Transfer log</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Confirm</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 3: Log Transfer to Chilled Storage</div>
+        <div class="card-subtitle">Select an available cold room for the meat batch.</div>
+        <div class="tank-grid">
+          <div class="tank-item" onclick="selectTank(this,'CR-1')"><div class="tank-visual">🧊</div><div class="tank-id">Cold Room CR-1</div><div class="tank-cap">Cap: 2000 kg &nbsp;|&nbsp; Used: 850 kg</div><div class="tank-status tank-available">Available</div></div>
+          <div class="tank-item" onclick="selectTank(this,'CR-2')"><div class="tank-visual">🧊</div><div class="tank-id">Cold Room CR-2</div><div class="tank-cap">Cap: 2000 kg &nbsp;|&nbsp; Used: 1600 kg</div><div class="tank-status tank-partial">Partial</div></div>
+          <div class="tank-item full"><div class="tank-visual">🧊</div><div class="tank-id">Cold Room CR-3</div><div class="tank-cap">Cap: 1500 kg &nbsp;|&nbsp; Used: 1500 kg</div><div class="tank-status tank-full">Full</div></div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('harvest-meat-step2')">← Back</button>
+          <button class="btn btn-primary" onclick="navigate('harvest-saved')">Next: Confirm →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         USE CASE 2: DAIRY & MEAT OPERATIONS
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- UC2 Home -->
+    <section id="screen-production-home" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / Dairy &amp; Meat Operations</div>
+        <h1>Dairy &amp; Meat Operations</h1>
+        <p>Track production batches, monitor raw stock levels, and manage batch lifecycle.</p>
+      </div>
+
+      <div class="machine-alert mb-20">
+        <span class="machine-alert-icon">🔴</span>
+        <div>
+          <strong>Machine Alert — Pasteurizer M-03</strong><br>
+          <span style="font-size:13px">Fault detected at 06:55 AM. Technician notified. Batch B-2026-041 paused.</span>
+        </div>
+        <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="dismissAlert(this)">Acknowledge</button>
+      </div>
+
+      <div class="grid-4 mb-20">
+        <div class="stat-card"><div class="stat-icon">🥛</div><div class="stat-label">Raw Milk Stock</div><div class="stat-value">2,840 L</div><div class="stat-delta">↑ Sufficient</div></div>
+        <div class="stat-card"><div class="stat-icon">🥩</div><div class="stat-label">Raw Meat Stock</div><div class="stat-value">1,190 kg</div><div class="stat-delta">↓ Low — reorder soon</div></div>
+        <div class="stat-card"><div class="stat-icon">⚙️</div><div class="stat-label">Active Batches</div><div class="stat-value">6</div><div class="stat-delta">In production</div></div>
+        <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Ready for Packaging</div><div class="stat-value">3</div><div class="stat-delta">Awaiting transfer</div></div>
+      </div>
+
+      <div class="flex-between mb-16">
+        <div class="card-title">Active Production Batches</div>
+        <button class="btn btn-primary btn-sm" onclick="navigate('production-step1')">+ Start New Batch</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Batch ID</th><th>Product Type</th><th>Raw Material Used</th><th>Stage</th><th>Progress</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>B-2026-041</strong></td><td>Pasteurized Milk</td><td>680 L milk</td>
+                <td><span class="badge badge-amber">Pasteurization</span></td>
+                <td><div class="progress-bar-wrap" style="width:120px"><div class="progress-bar" style="width:45%"></div></div></td>
+                <td><span class="badge badge-amber">⚠️ Paused</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="navigate('production-step3')">Manage</button></td>
+              </tr>
+              <tr>
+                <td><strong>B-2026-040</strong></td><td>Yogurt</td><td>400 L milk</td>
+                <td><span class="badge badge-blue">Fermentation</span></td>
+                <td><div class="progress-bar-wrap" style="width:120px"><div class="progress-bar" style="width:70%"></div></div></td>
+                <td><span class="badge badge-blue">In Progress</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="navigate('production-step3')">Manage</button></td>
+              </tr>
+              <tr>
+                <td><strong>B-2026-039</strong></td><td>Dry-Aged Beef</td><td>200 kg meat</td>
+                <td><span class="badge badge-purple">Dry-Aging</span></td>
+                <td><div class="progress-bar-wrap" style="width:120px"><div class="progress-bar" style="width:60%"></div></div></td>
+                <td><span class="badge badge-blue">In Progress</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="navigate('production-step3')">Manage</button></td>
+              </tr>
+              <tr>
+                <td><strong>B-2026-038</strong></td><td>Cheese</td><td>1200 L milk</td>
+                <td><span class="badge badge-green">Packaging QC</span></td>
+                <td><div class="progress-bar-wrap" style="width:120px"><div class="progress-bar" style="width:92%"></div></div></td>
+                <td><span class="badge badge-green">Ready</span></td>
+                <td><button class="btn btn-amber btn-sm" onclick="navigate('production-complete')">Mark Ready ✓</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC2 Step 1: Select Production Line -->
+    <section id="screen-production-step1" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('production-home')">Operations</span> / New Batch</div>
+        <h1>Start New Production Batch</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item active"><div class="step-circle">1</div><div class="step-label"><div class="step-label-title">Select Line</div><div class="step-label-sub">Product type</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Check Stock</div><div class="step-label-sub">Verify materials</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Track Stages</div><div class="step-label-sub">Progress</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Finish</div><div class="step-label-sub">Ready for packaging</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 1: Select Production Line</div>
+        <div class="card-subtitle">Choose the product type and production line to begin.</div>
+        <div class="grid-2" style="gap:14px">
+          <div class="production-stage" onclick="selectProdLine(this,'Pasteurized Milk','Dairy Line A')">
+            <div class="stage-num">🥛</div>
+            <div><div style="font-weight:600">Pasteurized Milk</div><div class="text-small text-muted">Dairy Line A — Machine M-01, M-02</div></div>
+          </div>
+          <div class="production-stage" onclick="selectProdLine(this,'Yogurt','Dairy Line B')">
+            <div class="stage-num">🍦</div>
+            <div><div style="font-weight:600">Yogurt</div><div class="text-small text-muted">Dairy Line B — Fermentation Tanks</div></div>
+          </div>
+          <div class="production-stage" onclick="selectProdLine(this,'Cheese','Dairy Line C')">
+            <div class="stage-num">🧀</div>
+            <div><div style="font-weight:600">Cheese</div><div class="text-small text-muted">Dairy Line C — Curd Room</div></div>
+          </div>
+          <div class="production-stage" onclick="selectProdLine(this,'Butter','Dairy Line D')">
+            <div class="stage-num">🧈</div>
+            <div><div style="font-weight:600">Butter</div><div class="text-small text-muted">Dairy Line D — Churning Unit</div></div>
+          </div>
+          <div class="production-stage" onclick="selectProdLine(this,'Dry-Aged Beef','Meat Line M-1')">
+            <div class="stage-num">🥩</div>
+            <div><div style="font-weight:600">Dry-Aged Beef</div><div class="text-small text-muted">Meat Line M-1 — Dry-Aging Chamber</div></div>
+          </div>
+          <div class="production-stage" onclick="selectProdLine(this,'Fresh Meat Cut','Meat Line M-2')">
+            <div class="stage-num">🍖</div>
+            <div><div style="font-weight:600">Fresh Meat Cut</div><div class="text-small text-muted">Meat Line M-2 — Cutting Room</div></div>
+          </div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('production-home')">Cancel</button>
+          <button class="btn btn-primary" id="prodLineNext" onclick="navigate('production-step2')" disabled>Next: Check Raw Stock →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC2 Step 2: Stock Check Dashboard -->
+    <section id="screen-production-step2" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('production-home')">Operations</span> / New Batch</div>
+        <h1>Start New Production Batch</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Select Line</div><div class="step-label-sub">Pasteurized Milk</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Check Stock</div><div class="step-label-sub">Raw materials</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Track Stages</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-label"><div class="step-label-title">Finish</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 2: Raw Stock Dashboard</div>
+        <div class="card-subtitle">Review current raw material inventory from the Raw Material Database before starting production.</div>
+        <div class="grid-2" style="margin-bottom:20px">
+          <div style="padding:16px;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm)">
+            <div class="flex-between mb-16"><span style="font-weight:600">🥛 Raw Milk Stock</span><span class="badge badge-green">Sufficient</span></div>
+            <div style="font-size:28px;font-weight:700;color:var(--green-deep)">2,840 L</div>
+            <div style="font-size:13px;color:var(--text-light);margin:6px 0">Required for batch: <strong>680 L</strong></div>
+            <div class="stock-meter mt-12"><div class="stock-fill stock-ok" style="width:71%"></div></div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:4px">71% remaining of 4,000L capacity</div>
+          </div>
+          <div style="padding:16px;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm)">
+            <div class="flex-between mb-16"><span style="font-weight:600">🥩 Raw Meat Stock</span><span class="badge badge-amber">Low</span></div>
+            <div style="font-size:28px;font-weight:700;color:var(--amber-dark)">1,190 kg</div>
+            <div style="font-size:13px;color:var(--text-light);margin:6px 0">Minimum threshold: <strong>1,000 kg</strong></div>
+            <div class="stock-meter mt-12"><div class="stock-fill stock-warn" style="width:30%"></div></div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:4px">30% remaining — Warehouse Coordinator notified</div>
+          </div>
+        </div>
+        <div class="alert alert-success"><span class="alert-icon">✅</span>Sufficient raw milk available. You may proceed to start the <strong>Pasteurized Milk</strong> batch on Dairy Line A.</div>
+        <div class="form-group">
+          <label class="form-label">Batch Volume to Produce</label>
+          <div class="flex gap-8"><input class="form-control" type="number" value="680" style="max-width:180px"/> <span style="align-self:center;font-size:14px;color:var(--text-mid)">Litres</span></div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('production-step1')">← Back</button>
+          <button class="btn btn-primary" onclick="navigate('production-step3')">Start Production →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC2 Step 3: Stage Tracker -->
+    <section id="screen-production-step3" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('production-home')">Operations</span> / Batch B-2026-042</div>
+        <h1>Batch B-2026-042 — Pasteurized Milk</h1>
+      </div>
+      <div class="card mb-20">
+        <div class="tab-bar">
+          <div class="tab active" onclick="switchTab(this,'tab-stages')">Production Stages</div>
+          <div class="tab" onclick="switchTab(this,'tab-quality')">Quality Inspection</div>
+          <div class="tab" onclick="switchTab(this,'tab-dryage')">Dry-Aging Monitor</div>
+        </div>
+        <div id="tab-stages" class="tab-content active">
+          <div class="card-subtitle">Update the batch status as it moves through each production stage.</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="production-stage current">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--green-mid);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">✓</div>
+              <div style="flex:1"><div style="font-weight:600">Raw Milk Intake</div><div class="text-small text-muted">Verified 680L from Raw Material Database</div></div>
+              <span class="badge badge-green">Completed — 08:00 AM</span>
+            </div>
+            <div class="production-stage current">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--amber);color:white;display:flex;align-items:center;justify-content:center;font-size:18px">⏳</div>
+              <div style="flex:1"><div style="font-weight:600">Pasteurization</div><div class="text-small text-muted">Machine M-01 — Target: 72°C for 15 seconds (HTST)</div></div>
+              <span class="badge badge-amber">In Progress</span>
+            </div>
+            <div class="production-stage">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--cream-dark);color:var(--text-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">3</div>
+              <div style="flex:1"><div style="font-weight:600">Cooling</div><div class="text-small text-muted">Cool to 4°C in refrigerated tanks</div></div>
+              <span class="badge badge-gray">Pending</span>
+            </div>
+            <div class="production-stage">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--cream-dark);color:var(--text-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">4</div>
+              <div style="flex:1"><div style="font-weight:600">Quality Inspection</div><div class="text-small text-muted">Quality Inspector reviews dairy inspection results</div></div>
+              <span class="badge badge-gray">Pending</span>
+            </div>
+            <div class="production-stage">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--cream-dark);color:var(--text-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">5</div>
+              <div style="flex:1"><div style="font-weight:600">Packaging Readiness</div><div class="text-small text-muted">Mark batch ready for Packaging Department</div></div>
+              <span class="badge badge-gray">Pending</span>
+            </div>
+          </div>
+          <div class="form-group mt-20">
+            <label class="form-label">Update Stage Status</label>
+            <div class="flex gap-8">
+              <select class="form-control" style="max-width:240px">
+                <option>Pasteurization — In Progress</option>
+                <option>Pasteurization — Completed</option>
+                <option>Cooling — In Progress</option>
+              </select>
+              <button class="btn btn-primary" onclick="showMsg('Stage updated successfully!')">Update →</button>
+            </div>
+          </div>
+        </div>
+        <div id="tab-quality" class="tab-content">
+          <div class="card-subtitle">Log quality inspection results for dairy production.</div>
+          <div class="form-group">
+            <label class="form-label">Inspection Type</label>
+            <select class="form-control"><option>Raw Milk Quality Check</option><option>Post-Pasteurization Check</option><option>Packaging Readiness Inspection</option></select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Fat Content (%)</label><input class="form-control" type="number" placeholder="e.g. 3.5" step="0.1"/></div>
+            <div class="form-group"><label class="form-label">Protein Content (%)</label><input class="form-control" type="number" placeholder="e.g. 3.2" step="0.1"/></div>
+            <div class="form-group"><label class="form-label">Bacterial Count (CFU/mL)</label><input class="form-control" type="number" placeholder="e.g. 50000"/></div>
+            <div class="form-group"><label class="form-label">Somatic Cell Count</label><input class="form-control" type="number" placeholder="e.g. 200000"/></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Inspection Result</label>
+            <select class="form-control"><option>Passed</option><option>Failed — Reject Batch</option><option>Conditional — Retest Required</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Inspector Notes</label><textarea class="form-control" placeholder="Observations…"></textarea></div>
+          <div class="flex-end"><button class="btn btn-primary" onclick="showMsg('Quality inspection result saved!')">Save Inspection Result</button></div>
+        </div>
+        <div id="tab-dryage" class="tab-content">
+          <div class="card-subtitle">Monitor dry-aging duration for meat batches.</div>
+          <div class="alert alert-info"><span class="alert-icon">🥩</span>This view applies to meat batches. Current active dry-aging: <strong>Batch B-2026-039 — Dry-Aged Beef</strong></div>
+          <div class="grid-2 mt-12">
+            <div class="info-block"><div class="info-block-label">Aging Start Date</div><div class="info-block-value">05 Apr 2026</div></div>
+            <div class="info-block"><div class="info-block-label">Target Duration</div><div class="info-block-value">21 Days</div></div>
+            <div class="info-block"><div class="info-block-label">Days Elapsed</div><div class="info-block-value">9 Days</div></div>
+            <div class="info-block"><div class="info-block-label">Est. Completion</div><div class="info-block-value">26 Apr 2026</div></div>
+          </div>
+          <div class="form-group mt-16">
+            <label class="form-label">Chamber Temperature (°C)</label>
+            <div class="flex gap-8"><input class="form-control" type="number" value="2" style="max-width:140px"/><button class="btn btn-outline" onclick="showMsg('Temperature logged!')">Log</button></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Humidity (%)</label>
+            <div class="flex gap-8"><input class="form-control" type="number" value="80" style="max-width:140px"/><button class="btn btn-outline" onclick="showMsg('Humidity logged!')">Log</button></div>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="dryAgeComplete"/>
+              <label for="dryAgeComplete">Mark dry-aging as complete — record count of completed units</label>
+            </div>
+          </div>
+          <div class="flex-end"><button class="btn btn-primary" onclick="showMsg('Dry-aging data updated!')">Update Aging Record</button></div>
+        </div>
+      </div>
+      <div class="flex-end">
+        <button class="btn btn-secondary" onclick="navigate('production-home')">← Back to Operations</button>
+        <button class="btn btn-amber btn-lg" onclick="navigate('production-step4')">Mark Batch Ready for Packaging →</button>
+      </div>
+    </section>
+
+    <!-- UC2 Step 4: Finish Count & Mark Ready -->
+    <section id="screen-production-step4" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('production-home')">Operations</span> / Batch B-2026-042</div>
+        <h1>Finalize Batch B-2026-042</h1>
+      </div>
+      <div class="card">
+        <div class="card-title">Record Finished Units &amp; Mark Ready for Packaging</div>
+        <div class="card-subtitle">Enter the final count of finished products before transferring to the Packaging Department.</div>
+        <div class="form-group">
+          <label class="form-label">Count of Finished Units <span class="req">*</span></label>
+          <div class="flex gap-8"><input class="form-control" type="number" placeholder="e.g. 1360" style="max-width:220px"/><span style="align-self:center;color:var(--text-mid)">units (1L cartons)</span></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Type</label>
+          <input class="form-control" value="Pasteurized Milk" readonly style="background:var(--cream)"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Production Line</label>
+          <input class="form-control" value="Dairy Line A — Machine M-01" readonly style="background:var(--cream)"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Batch Completion Notes</label>
+          <textarea class="form-control" placeholder="Any notes on the completed batch…"></textarea>
+        </div>
+        <div class="hr"></div>
+        <div class="alert alert-warning"><span class="alert-icon">📦</span>Marking this batch as <strong>"Ready for Packaging"</strong> will update the Product Database and alert the Packaging Department.</div>
+        <div class="flex-end mt-12">
+          <button class="btn btn-secondary" onclick="navigate('production-step3')">← Back</button>
+          <button class="btn btn-amber btn-lg" onclick="navigate('production-complete')">✅ Mark as Ready for Packaging</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC2 Complete -->
+    <section id="screen-production-complete" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('production-home')">Operations</span></div>
+        <h1>Batch Completed</h1>
+      </div>
+      <div class="card">
+        <div class="confirmation-box">
+          <div class="confirmation-icon">🏭</div>
+          <h2>Batch Ready for Packaging!</h2>
+          <p>The Product Database has been updated and the Packaging Department has been notified.</p>
+          <div class="ref-number">B-2026-042</div>
+          <p style="margin-top:8px">Pasteurized Milk — 1,360 units → Ready for Packaging</p>
+        </div>
+        <div class="summary-list mt-20">
+          <div class="summary-row"><span class="key">Batch ID</span><span class="val"><strong>B-2026-042</strong></span></div>
+          <div class="summary-row"><span class="key">Product</span><span class="val">Pasteurized Milk</span></div>
+          <div class="summary-row"><span class="key">Finished Units</span><span class="val">1,360 units (1L cartons)</span></div>
+          <div class="summary-row"><span class="key">Status</span><span class="val"><span class="badge badge-green">Ready for Packaging</span></span></div>
+          <div class="summary-row"><span class="key">Updated At</span><span class="val">14 Apr 2026, 10:15 AM</span></div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('production-home')">Back to Operations</button>
+          <button class="btn btn-primary" onclick="navigate('production-step1')">+ New Batch</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         USE CASE 3: MANAGE ANIMAL CARE
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- UC3 Home -->
+    <section id="screen-animal-home" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / Manage Animal Care</div>
+        <h1>Manage Animal Care</h1>
+        <p>Create and maintain digital health records for all animals in the Cow Database.</p>
+      </div>
+
+      <div class="flex-between mb-20">
+        <div class="flex gap-8">
+          <button class="btn btn-primary" onclick="navigate('animal-create')">+ New Animal Profile</button>
+          <input class="form-control" placeholder="🔍 Search by ID or name…" style="width:240px" oninput="filterAnimals(this.value)"/>
+        </div>
+        <div class="flex gap-8">
+          <select class="form-control" style="width:140px">
+            <option>All Types</option>
+            <option>Dairy Cows</option>
+            <option>Meat Cows</option>
+            <option>Calves</option>
+          </select>
+          <select class="form-control" style="width:160px">
+            <option>All Health Status</option>
+            <option>Excellent</option>
+            <option>Good</option>
+            <option>Monitor</option>
+            <option>Critical</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3" id="animalGrid">
+        <div class="animal-profile-card" onclick="navigate('animal-view')">
+          <div class="profile-header"><div class="profile-avatar">🐄</div><div><div class="profile-name">Nong Milk</div><div class="profile-id">ID: C-0042 &nbsp;·&nbsp; Dairy Cow</div></div><span class="health-pill health-excellent" style="margin-left:auto">Excellent</span></div>
+          <div class="profile-body">
+            <div class="grid-2" style="gap:8px;font-size:13px">
+              <div><span class="text-muted">Age:</span> 4 years</div>
+              <div><span class="text-muted">Weight:</span> 520 kg</div>
+              <div><span class="text-muted">Avg Yield:</span> 28.2 L/day</div>
+              <div><span class="text-muted">Pregnancy:</span> None</div>
+            </div>
+            <div class="hr" style="margin:10px 0"></div>
+            <div style="font-size:12px;color:var(--text-light)">Last check: 10 Apr 2026 &nbsp;·&nbsp; Dr. Pranee S.</div>
+          </div>
+        </div>
+        <div class="animal-profile-card" onclick="navigate('animal-view')">
+          <div class="profile-header"><div class="profile-avatar">🐄</div><div><div class="profile-name">Bua Daeng</div><div class="profile-id">ID: C-0017 &nbsp;·&nbsp; Dairy Cow</div></div><span class="health-pill health-good" style="margin-left:auto">Good</span></div>
+          <div class="profile-body">
+            <div class="grid-2" style="gap:8px;font-size:13px">
+              <div><span class="text-muted">Age:</span> 6 years</div>
+              <div><span class="text-muted">Weight:</span> 540 kg</div>
+              <div><span class="text-muted">Avg Yield:</span> 31.0 L/day</div>
+              <div><span class="text-muted">Pregnancy:</span> Confirmed (5 mo)</div>
+            </div>
+            <div class="hr" style="margin:10px 0"></div>
+            <div style="font-size:12px;color:var(--text-light)">Last check: 08 Apr 2026 &nbsp;·&nbsp; Dr. Pranee S.</div>
+          </div>
+        </div>
+        <div class="animal-profile-card" onclick="navigate('animal-view')">
+          <div class="profile-header"><div class="profile-avatar">🐮</div><div><div class="profile-name">Dang Yai</div><div class="profile-id">ID: C-0103 &nbsp;·&nbsp; Meat Cow</div></div><span class="health-pill health-good" style="margin-left:auto">Good</span></div>
+          <div class="profile-body">
+            <div class="grid-2" style="gap:8px;font-size:13px">
+              <div><span class="text-muted">Age:</span> 3 years</div>
+              <div><span class="text-muted">Weight:</span> 580 kg</div>
+              <div><span class="text-muted">Growth:</span> On target</div>
+              <div><span class="text-muted">Slaughter:</span> <span style="color:#065f46;font-weight:600">Eligible ✓</span></div>
+            </div>
+            <div class="hr" style="margin:10px 0"></div>
+            <div style="font-size:12px;color:var(--text-light)">Last check: 12 Apr 2026 &nbsp;·&nbsp; Dr. Somwang T.</div>
+          </div>
+        </div>
+        <div class="animal-profile-card" onclick="navigate('animal-view')">
+          <div class="profile-header"><div class="profile-avatar">🐄</div><div><div class="profile-name">Khao Nuan</div><div class="profile-id">ID: C-0059 &nbsp;·&nbsp; Dairy Cow</div></div><span class="health-pill health-monitor" style="margin-left:auto">Monitor</span></div>
+          <div class="profile-body">
+            <div class="grid-2" style="gap:8px;font-size:13px">
+              <div><span class="text-muted">Age:</span> 5 years</div>
+              <div><span class="text-muted">Weight:</span> 490 kg</div>
+              <div><span class="text-muted">Avg Yield:</span> 25.8 L/day</div>
+              <div><span class="text-muted">AI Record:</span> 02 Apr 2026</div>
+            </div>
+            <div class="hr" style="margin:10px 0"></div>
+            <div style="font-size:12px;color:var(--text-light)">Last check: 13 Apr 2026 &nbsp;·&nbsp; Dr. Pranee S.</div>
+          </div>
+        </div>
+        <div class="animal-profile-card" onclick="navigate('animal-view')">
+          <div class="profile-header"><div class="profile-avatar">🐄</div><div><div class="profile-name">Fah Sai</div><div class="profile-id">ID: C-0248 &nbsp;·&nbsp; Dairy Calf</div></div><span class="health-pill health-excellent" style="margin-left:auto">Excellent</span></div>
+          <div class="profile-body">
+            <div class="grid-2" style="gap:8px;font-size:13px">
+              <div><span class="text-muted">Born:</span> 14 Apr 2026</div>
+              <div><span class="text-muted">Weight:</span> 38 kg</div>
+              <div><span class="text-muted">Dam:</span> C-0017</div>
+              <div><span class="text-muted">Vaccination:</span> Pending</div>
+            </div>
+            <div class="hr" style="margin:10px 0"></div>
+            <div style="font-size:12px;color:var(--text-light)">Created: 14 Apr 2026 &nbsp;·&nbsp; Dr. Pranee S.</div>
+          </div>
+        </div>
+        <div class="animal-profile-card" onclick="navigate('animal-view')">
+          <div class="profile-header"><div class="profile-avatar">🐮</div><div><div class="profile-name">Khom Dam</div><div class="profile-id">ID: C-0089 &nbsp;·&nbsp; Meat Cow</div></div><span class="health-pill health-critical" style="margin-left:auto">Critical</span></div>
+          <div class="profile-body">
+            <div class="grid-2" style="gap:8px;font-size:13px">
+              <div><span class="text-muted">Age:</span> 4 years</div>
+              <div><span class="text-muted">Weight:</span> 510 kg</div>
+              <div><span class="text-muted">Growth:</span> Below target</div>
+              <div><span class="text-muted">Slaughter:</span> <span style="color:#991b1b;font-weight:600">Not Eligible</span></div>
+            </div>
+            <div class="hr" style="margin:10px 0"></div>
+            <div style="font-size:12px;color:var(--text-light)">Last check: 11 Apr 2026 &nbsp;·&nbsp; Dr. Somwang T.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC3 Create New Animal Profile -->
+    <section id="screen-animal-create" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('animal-home')">Animal Care</span> / New Animal Profile</div>
+        <h1>Create New Animal Profile</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item active"><div class="step-circle">1</div><div class="step-label"><div class="step-label-title">Basic Info</div><div class="step-label-sub">Profile setup</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Health Data</div><div class="step-label-sub">Medical records</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Review</div><div class="step-label-sub">Confirm &amp; save</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 1: Basic Animal Information</div>
+        <div class="card-subtitle">The system will auto-generate an Animal ID. Fill in all required details.</div>
+        <div class="alert alert-info mb-16"><span class="alert-icon">🆔</span>Animal ID will be automatically assigned: <strong>C-0249</strong></div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Animal Name</label>
+            <input class="form-control" placeholder="e.g. Nong Fah"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Animal Type <span class="req">*</span></label>
+            <select class="form-control">
+              <option value="">-- Select --</option>
+              <option>Dairy Cow</option>
+              <option>Meat Cow</option>
+              <option>Dairy Calf</option>
+              <option>Meat Calf</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth <span class="req">*</span></label>
+            <input class="form-control" type="date" max="2026-04-14" id="dobInput"/>
+            <div class="form-error" id="dobError">⚠️ Birth date cannot be in the future.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Birth Weight (kg) <span class="req">*</span></label>
+            <input class="form-control" type="number" placeholder="e.g. 38" min="0"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dam ID (Mother)</label>
+            <input class="form-control" placeholder="e.g. C-0017 (leave blank if unknown)"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sire ID (Father)</label>
+            <input class="form-control" placeholder="e.g. AI-Sire-007"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Health Observations</label>
+          <textarea class="form-control" placeholder="Any observations at birth or intake…"></textarea>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('animal-home')">Cancel</button>
+          <button class="btn btn-primary" onclick="navigate('animal-health')">Next: Health Data →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC3 Health Data -->
+    <section id="screen-animal-health" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('animal-home')">Animal Care</span> / New Animal Profile</div>
+        <h1>Create New Animal Profile</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Basic Info</div><div class="step-label-sub">C-0249</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">2</div><div class="step-label"><div class="step-label-title">Health Data</div><div class="step-label-sub">Medical records</div></div></div>
+        <div class="step-connector"></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Review</div><div class="step-label-sub">Confirm &amp; save</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 2: Record Health &amp; Reproductive Data</div>
+        <div class="card-subtitle">Enter vaccination records, health checks, AI records, and pregnancy confirmation.</div>
+        <div class="tab-bar">
+          <div class="tab active" onclick="switchTab(this,'htab-vaccinations')">Vaccinations</div>
+          <div class="tab" onclick="switchTab(this,'htab-health')">Health Checks</div>
+          <div class="tab" onclick="switchTab(this,'htab-repro')">Reproduction</div>
+          <div class="tab" onclick="switchTab(this,'htab-slaughter')">Slaughter Eligibility</div>
+        </div>
+        <div id="htab-vaccinations" class="tab-content active">
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Vaccine Name <span class="req">*</span></label><input class="form-control" placeholder="e.g. FMD Vaccine"/></div>
+            <div class="form-group"><label class="form-label">Date Administered <span class="req">*</span></label><input class="form-control" type="date"/></div>
+            <div class="form-group"><label class="form-label">Dosage</label><input class="form-control" placeholder="e.g. 5 mL"/></div>
+            <div class="form-group"><label class="form-label">Next Due Date</label><input class="form-control" type="date"/></div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="showMsg('Vaccination record added!')">+ Add Vaccination Record</button>
+        </div>
+        <div id="htab-health" class="tab-content">
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Check Date <span class="req">*</span></label><input class="form-control" type="date"/></div>
+            <div class="form-group"><label class="form-label">Health Status <span class="req">*</span></label><select class="form-control"><option>Excellent</option><option>Good</option><option>Monitor Required</option><option>Critical</option></select></div>
+            <div class="form-group"><label class="form-label">Body Temperature (°C)</label><input class="form-control" type="number" placeholder="38.5" step="0.1"/></div>
+            <div class="form-group"><label class="form-label">Body Weight (kg)</label><input class="form-control" type="number" placeholder="e.g. 38"/></div>
+          </div>
+          <div class="form-group"><label class="form-label">Veterinarian Notes</label><textarea class="form-control" placeholder="Observations, treatments…"></textarea></div>
+          <button class="btn btn-outline btn-sm" onclick="showMsg('Health check record saved!')">Save Health Check</button>
+        </div>
+        <div id="htab-repro" class="tab-content">
+          <div class="form-group">
+            <label class="form-label">Artificial Insemination (AI) Date</label>
+            <input class="form-control" type="date"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sire Used</label>
+            <input class="form-control" placeholder="AI Sire ID or name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pregnancy Confirmation</label>
+            <select class="form-control">
+              <option value="">Not yet checked</option>
+              <option>Confirmed — Pregnant</option>
+              <option>Not Pregnant</option>
+              <option>Uncertain — Recheck Required</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Calving Date</label>
+            <input class="form-control" type="date"/>
+          </div>
+          <div class="form-group"><label class="form-label">Reproduction Notes</label><textarea class="form-control" placeholder="Cycle observations…"></textarea></div>
+          <button class="btn btn-outline btn-sm" onclick="showMsg('Reproduction record saved!')">Save Reproduction Record</button>
+        </div>
+        <div id="htab-slaughter" class="tab-content">
+          <div class="alert alert-warning mb-16"><span class="alert-icon">🔴</span>This section applies to <strong>Meat Cows</strong> only. Dairy cows are not evaluated for slaughter.</div>
+          <div class="form-group">
+            <label class="form-label">Current Body Weight (kg) <span class="req">*</span></label>
+            <input class="form-control" type="number" placeholder="Minimum threshold: 450 kg"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Overall Health Status</label>
+            <select class="form-control"><option>Good — No issues</option><option>Minor Issues — Cleared</option><option>Health Concern — Not Eligible</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Veterinarian Assessment Notes</label>
+            <textarea class="form-control" placeholder="Basis for eligibility decision…"></textarea>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="slaughterEligible" onchange="updateSlaughterBadge(this)"/>
+              <label for="slaughterEligible" style="font-weight:600;font-size:15px">✅ Declare this animal Eligible for Slaughter</label>
+            </div>
+          </div>
+          <div id="eligibilityStatus" class="alert alert-info" style="display:none">
+            <span class="alert-icon">✅</span>
+            <div>Animal has been marked <strong>Eligible for Slaughter</strong>. Farm Workers will see this status during meat harvesting.</div>
+          </div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('animal-create')">← Back</button>
+          <button class="btn btn-primary" onclick="navigate('animal-review')">Next: Review &amp; Save →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC3 Review & Save -->
+    <section id="screen-animal-review" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('animal-home')">Animal Care</span> / New Animal Profile</div>
+        <h1>Create New Animal Profile</h1>
+      </div>
+      <div class="wizard-steps">
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Basic Info</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item done"><div class="step-circle">✓</div><div class="step-label"><div class="step-label-title">Health Data</div></div></div>
+        <div class="step-connector done"></div>
+        <div class="step-item active"><div class="step-circle">3</div><div class="step-label"><div class="step-label-title">Review</div><div class="step-label-sub">Confirm &amp; save</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 3: Review &amp; Save Profile</div>
+        <div class="card-subtitle">Confirm all animal information before saving to the Cow Database.</div>
+        <div class="summary-list">
+          <div class="summary-row"><span class="key">Auto-Generated ID</span><span class="val"><strong>C-0249</strong></span></div>
+          <div class="summary-row"><span class="key">Animal Name</span><span class="val">Nong Fah</span></div>
+          <div class="summary-row"><span class="key">Animal Type</span><span class="val">🐄 Dairy Calf</span></div>
+          <div class="summary-row"><span class="key">Date of Birth</span><span class="val">14 Apr 2026</span></div>
+          <div class="summary-row"><span class="key">Birth Weight</span><span class="val">38 kg</span></div>
+          <div class="summary-row"><span class="key">Dam (Mother)</span><span class="val">C-0017 — Bua Daeng</span></div>
+          <div class="summary-row"><span class="key">Health Status</span><span class="val"><span class="badge badge-green">Excellent</span></span></div>
+          <div class="summary-row"><span class="key">Vaccination</span><span class="val">FMD Vaccine — 14 Apr 2026</span></div>
+          <div class="summary-row"><span class="key">Pregnancy Status</span><span class="val">N/A (Calf)</span></div>
+          <div class="summary-row"><span class="key">Slaughter Eligibility</span><span class="val">N/A (Dairy Calf)</span></div>
+          <div class="summary-row"><span class="key">Created By</span><span class="val">Dr. Pranee S. (Veterinarian)</span></div>
+        </div>
+        <div class="form-group mt-20">
+          <div class="checkbox-group">
+            <input type="checkbox" id="confirmAnimalCheck" onchange="toggleAnimalSave()"/>
+            <label for="confirmAnimalCheck">I confirm that all animal information is accurate.</label>
+          </div>
+        </div>
+        <div class="flex-end mt-12">
+          <button class="btn btn-secondary" onclick="navigate('animal-health')">← Back</button>
+          <button class="btn btn-primary btn-lg" id="saveAnimalBtn" onclick="navigate('animal-saved')" disabled>💾 Save to Cow Database</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC3 Saved Confirmation -->
+    <section id="screen-animal-saved" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('animal-home')">Animal Care</span></div>
+        <h1>Animal Profile Saved</h1>
+      </div>
+      <div class="card">
+        <div class="confirmation-box">
+          <div class="confirmation-icon">🐄</div>
+          <h2>Animal Profile Successfully Created!</h2>
+          <p>The record has been saved to the Cow Database and is now accessible to Farm Workers.</p>
+          <div class="ref-number">C-0249</div>
+          <p style="margin-top:8px">Nong Fah — Dairy Calf — Born 14 Apr 2026</p>
+        </div>
+        <div class="summary-list mt-20">
+          <div class="summary-row"><span class="key">Animal ID</span><span class="val"><strong>C-0249</strong></span></div>
+          <div class="summary-row"><span class="key">Saved At</span><span class="val">14 Apr 2026, 06:20 AM</span></div>
+          <div class="summary-row"><span class="key">Next Action</span><span class="val">Schedule vaccination check in 30 days</span></div>
+        </div>
+        <div class="flex-end mt-20">
+          <button class="btn btn-secondary" onclick="navigate('animal-home')">Back to Animal Care</button>
+          <button class="btn btn-primary" onclick="navigate('animal-create')">+ New Animal Profile</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- UC3 View Existing Animal -->
+    <section id="screen-animal-view" class="screen">
+      <div class="page-header">
+        <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('animal-home')">Animal Care</span> / C-0042</div>
+        <h1>Animal Profile — C-0042</h1>
+      </div>
+      <div class="flex-between mb-20">
+        <div class="flex gap-8">
+          <span class="badge badge-green">✅ Excellent Health</span>
+          <span class="badge badge-blue">🐄 Dairy Cow</span>
+        </div>
+        <button class="btn btn-primary" onclick="navigate('animal-health')">+ Add Health Record</button>
+      </div>
+      <div class="card mb-20">
+        <div class="tab-bar">
+          <div class="tab active" onclick="switchTab(this,'vtab-overview')">Overview</div>
+          <div class="tab" onclick="switchTab(this,'vtab-health')">Health History</div>
+          <div class="tab" onclick="switchTab(this,'vtab-yields')">Milk Yields</div>
+          <div class="tab" onclick="switchTab(this,'vtab-repro')">Reproduction</div>
+        </div>
+        <div id="vtab-overview" class="tab-content active">
+          <div class="grid-3" style="gap:12px">
+            <div class="info-block"><div class="info-block-label">Cow ID</div><div class="info-block-value">C-0042</div></div>
+            <div class="info-block"><div class="info-block-label">Name</div><div class="info-block-value">Nong Milk</div></div>
+            <div class="info-block"><div class="info-block-label">Type</div><div class="info-block-value">Dairy Cow</div></div>
+            <div class="info-block"><div class="info-block-label">Date of Birth</div><div class="info-block-value">12 Mar 2022</div></div>
+            <div class="info-block"><div class="info-block-label">Age</div><div class="info-block-value">4 years, 1 month</div></div>
+            <div class="info-block"><div class="info-block-label">Current Weight</div><div class="info-block-value">520 kg</div></div>
+            <div class="info-block"><div class="info-block-label">Avg Daily Yield</div><div class="info-block-value">28.2 L</div></div>
+            <div class="info-block"><div class="info-block-label">Pregnancy</div><div class="info-block-value">Not Pregnant</div></div>
+            <div class="info-block"><div class="info-block-label">Dam</div><div class="info-block-value">C-0011</div></div>
+          </div>
+        </div>
+        <div id="vtab-health" class="tab-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Type</th><th>Status</th><th>Temp (°C)</th><th>Weight (kg)</th><th>Notes</th><th>Vet</th></tr></thead>
+              <tbody>
+                <tr><td>10 Apr 2026</td><td>Routine Check</td><td><span class="badge badge-green">Excellent</span></td><td>38.5</td><td>520</td><td>Healthy, no issues</td><td>Dr. Pranee</td></tr>
+                <tr><td>25 Mar 2026</td><td>Vaccination</td><td><span class="badge badge-green">Excellent</span></td><td>38.6</td><td>516</td><td>FMD booster administered</td><td>Dr. Pranee</td></tr>
+                <tr><td>10 Jan 2026</td><td>Routine Check</td><td><span class="badge badge-blue">Good</span></td><td>38.7</td><td>508</td><td>Minor feed adjustment</td><td>Dr. Somwang</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="vtab-yields" class="tab-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Morning (L)</th><th>Evening (L)</th><th>Daily Total (L)</th><th>Harvest ID</th></tr></thead>
+              <tbody>
+                <tr><td>14 Apr 2026</td><td>14.8</td><td>13.6</td><td><strong>28.4</strong></td><td>HV-2026-090</td></tr>
+                <tr><td>13 Apr 2026</td><td>14.2</td><td>13.9</td><td><strong>28.1</strong></td><td>HV-2026-086</td></tr>
+                <tr><td>12 Apr 2026</td><td>14.5</td><td>13.5</td><td><strong>28.0</strong></td><td>HV-2026-082</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="vtab-repro" class="tab-content">
+          <div class="alert alert-info mb-16"><span class="alert-icon">🔬</span>Most recent AI record: <strong>No AI on file</strong>. Pregnancy: <strong>Not Pregnant</strong>.</div>
+          <button class="btn btn-primary btn-sm" onclick="navigate('animal-health')">+ Add AI / Pregnancy Record</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══════ MODAL ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="msgModal">
+  <div class="modal">
+    <div class="modal-title">✅ Action Completed</div>
+    <p id="modalMsg" style="font-size:14px;color:var(--text-mid);margin-top:8px"></p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('msgModal').classList.remove('open')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SCRIPTS ═══════════════════════════════════════════════ -->
+<script>
+  // ── Navigation ──────────────────────────────────────────────
+  const roleMap = {
+    'dashboard': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-home': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-step1': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-step2': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-step3': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-step4': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-saved': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-meat-step1': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-meat-step2': { label: 'Farm Worker', initials: 'FW' },
+    'harvest-meat-step3': { label: 'Farm Worker', initials: 'FW' },
+    'production-home': { label: 'Production Floor Staff', initials: 'PS' },
+    'production-step1': { label: 'Production Floor Staff', initials: 'PS' },
+    'production-step2': { label: 'Production Floor Staff', initials: 'PS' },
+    'production-step3': { label: 'Production Floor Staff', initials: 'PS' },
+    'production-step4': { label: 'Production Floor Staff', initials: 'PS' },
+    'production-complete': { label: 'Production Floor Staff', initials: 'PS' },
+    'animal-home': { label: 'Veterinarian', initials: 'VT' },
+    'animal-create': { label: 'Veterinarian', initials: 'VT' },
+    'animal-health': { label: 'Veterinarian', initials: 'VT' },
+    'animal-review': { label: 'Veterinarian', initials: 'VT' },
+    'animal-saved': { label: 'Veterinarian', initials: 'VT' },
+    'animal-view': { label: 'Veterinarian', initials: 'VT' },
+  };
+
+  function navigate(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('screen-' + id);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navTarget = document.querySelector(`[data-nav="${id}"]`);
+    if (navTarget) navTarget.classList.add('active');
+    // Update role badge
+    const role = roleMap[id];
+    if (role) {
+      document.querySelector('#headerRole span').textContent = role.label;
+      document.getElementById('headerAvatar').textContent = role.initials;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── UC1: Cow Verification ────────────────────────────────────
+  function verifyCow() {
+    const val = document.getElementById('cowIdInput').value.trim().toUpperCase();
+    const err = document.getElementById('cowIdError');
+    const card = document.getElementById('cowVerifiedCard');
+    const btn = document.getElementById('step1Next');
+    const validIds = ['C-0042','C-0017','C-0059','C-0248'];
+    if (validIds.includes(val) || val === '') {
+      if (val === '') { err.classList.add('show'); card.style.display='none'; btn.disabled=true; return; }
+      err.classList.remove('show');
+      card.style.display='block';
+      btn.disabled = false;
+    } else {
+      err.classList.add('show');
+      card.style.display = 'none';
+      btn.disabled = true;
+      document.getElementById('cowIdInput').classList.add('error');
+      setTimeout(() => document.getElementById('cowIdInput').classList.remove('error'), 2000);
+    }
+  }
+
+  // ── UC1: Meat Cow Verification ───────────────────────────────
+  function verifyMeatCow() {
+    const val = document.getElementById('meatCowId').value.trim().toUpperCase();
+    const card = document.getElementById('meatCowCard');
+    const btn = document.getElementById('meatStep1Next');
+    if (val === 'C-0103' || val === 'C-0089' || val === '') {
+      card.style.display = 'block';
+      btn.disabled = false;
+    } else {
+      card.style.display = 'block';
+      btn.disabled = false;
+    }
+  }
+
+  // ── Tank Selection ───────────────────────────────────────────
+  function selectTank(el, id) {
+    el.closest('.tank-grid').querySelectorAll('.tank-item').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    const nextBtn = document.getElementById('storageNext');
+    if (nextBtn) nextBtn.disabled = false;
+  }
+
+  // ── Confirm Checkbox ─────────────────────────────────────────
+  function toggleSaveBtn() {
+    const cb = document.getElementById('confirmCheck');
+    document.getElementById('saveHarvestBtn').disabled = !cb.checked;
+  }
+  function saveHarvest() { navigate('harvest-saved'); }
+
+  function toggleAnimalSave() {
+    const cb = document.getElementById('confirmAnimalCheck');
+    document.getElementById('saveAnimalBtn').disabled = !cb.checked;
+  }
+
+  // ── Production Line Selection ────────────────────────────────
+  function selectProdLine(el, product, line) {
+    document.querySelectorAll('#screen-production-step1 .production-stage').forEach(s => s.classList.remove('current'));
+    el.classList.add('current');
+    document.getElementById('prodLineNext').disabled = false;
+  }
+
+  // ── Tabs ─────────────────────────────────────────────────────
+  function switchTab(tabEl, contentId) {
+    const parent = tabEl.closest('.card') || tabEl.closest('.main');
+    tabEl.closest('.tab-bar').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+    // find siblings
+    const allContent = tabEl.closest('.card') ? tabEl.closest('.card').querySelectorAll('.tab-content') : document.querySelectorAll('.tab-content');
+    allContent.forEach(c => c.classList.remove('active'));
+    const target = document.getElementById(contentId);
+    if (target) target.classList.add('active');
+  }
+
+  // ── Alert ────────────────────────────────────────────────────
+  function dismissAlert(btn) {
+    btn.closest('.machine-alert').style.display = 'none';
+    showMsg('Machine alert acknowledged. Technician has been dispatched.');
+  }
+
+  // ── Slaughter Badge ──────────────────────────────────────────
+  function updateSlaughterBadge(cb) {
+    document.getElementById('eligibilityStatus').style.display = cb.checked ? 'flex' : 'none';
+  }
+
+  // ── Modal ────────────────────────────────────────────────────
+  function showMsg(msg) {
+    document.getElementById('modalMsg').textContent = msg;
+    document.getElementById('msgModal').classList.add('open');
+  }
+
+  // ── Filter (stub) ─────────────────────────────────────────────
+  function filterHarvestTable(val) { /* real impl would filter rows */ }
+  function filterAnimals(val) { /* real impl would filter cards */ }
+</script>
+</body>
+</html>
