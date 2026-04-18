@@ -646,6 +646,16 @@ tbody tr:hover{background:var(--green-pale)}tbody td{padding:12px 16px;color:var
           <div class="card-subtitle">Log quality inspection results for this batch.</div>
           <div id="qualitySavedBadge" style="display:none;margin-bottom:16px"></div>
           <div class="form-group"><label class="form-label">Inspection Type</label><select class="form-control" id="qInspType"><option>Raw Material Quality Check</option><option>Post-Processing Check</option><option>Packaging Readiness Inspection</option></select></div>
+          <div class="form-group">
+            <label class="form-label">Inspection Result <span class="req">*</span></label>
+            <select class="form-control" id="qResult" onchange="clearQResultErr()">
+              <option value="">-- Select result --</option>
+              <option value="Passed">Passed</option>
+              <option value="Failed — Reject Batch">Failed — Reject Batch</option>
+              <option value="Conditional — Retest Required">Conditional — Retest Required</option>
+            </select>
+            <div class="form-error" id="qResultErr">⚠️ Please select an inspection result before saving.</div>
+          </div>
           <div class="flex-end"><button class="btn btn-primary" onclick="saveQualityInspection()">💾 Save Inspection Result</button></div>
         </div>
         <div id="tab-dryage" class="tab-content">
@@ -2282,25 +2292,44 @@ function deleteHarvest(id) {
 /* ══════════════════════════════════════════════════════════════════
    QUALITY INSPECTION — saves to batch record in db.production
 ══════════════════════════════════════════════════════════════════ */
+function clearQResultErr() {
+  var err = document.getElementById('qResultErr');
+  var sel = document.getElementById('qResult');
+  if(err) err.classList.remove('show');
+  if(sel) sel.classList.remove('error');
+}
+
 function saveQualityInspection() {
+  var result = document.getElementById('qResult').value;
+  if(!result) {
+    var err = document.getElementById('qResultErr');
+    var sel = document.getElementById('qResult');
+    if(err) err.classList.add('show');
+    if(sel) { sel.classList.add('error'); sel.focus(); setTimeout(function(){ sel.classList.remove('error'); }, 2000); }
+    return;
+  }
   var batchId = state.production.currentBatchId;
   var batch = batchId ? db.production.find(function(b){ return b.id === batchId; }) : null;
   var record = {
-    type: document.getElementById('qInspType').value,
+    type:    document.getElementById('qInspType').value,
+    result:  result,
     savedAt: new Date().toISOString()
   };
   if(batch) {
     if(!batch.qualityInspections) batch.qualityInspections = [];
     batch.qualityInspections.push(record);
-    batch.qualityStatus = 'Inspected';
+    batch.qualityStatus = result === 'Passed' ? 'Passed' : result.includes('Failed') ? 'Failed' : 'Conditional';
   }
-  // Show saved badge
+  var cls = result === 'Passed' ? 'badge-green' : result.includes('Failed') ? 'badge-red' : 'badge-amber';
   var badge = document.getElementById('qualitySavedBadge');
   if(badge) {
     badge.style.display = 'block';
-    badge.innerHTML = '<div class="quality-saved-tag"><span>✅ Last saved:</span> <span class="badge badge-green">' + record.type + '</span> &nbsp;at ' + fmtDateTime(record.savedAt) + '</div>';
+    badge.innerHTML = '<div class="quality-saved-tag"><span>✅ Last saved:</span> <span class="badge ' + cls + '">' + result + '</span> &nbsp;at ' + fmtDateTime(record.savedAt) + '</div>';
   }
-  toast('✅ Quality inspection saved to Product Database!');
+  // Reset dropdown for next entry
+  document.getElementById('qResult').value = '';
+  clearQResultErr();
+  toast('✅ Inspection result saved — ' + result + '.');
 }
 
 /* ══════════════════════════════════════════════════════════════════
