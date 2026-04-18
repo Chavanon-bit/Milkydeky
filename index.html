@@ -802,6 +802,7 @@ tbody tr:hover{background:var(--green-pale)}tbody td{padding:12px 16px;color:var
         <div class="card-subtitle">Enter vaccination records, health checks, AI records, and pregnancy confirmation.</div>
         <div class="tab-bar">
           <div class="tab active" onclick="switchTab(this,'htab-health')">Health Checks</div>
+          <div class="tab" onclick="switchTab(this,'htab-nutrition')">Nutrition &amp; Feed</div>
           <div class="tab" onclick="switchTab(this,'htab-repro')">Reproduction</div>
           <div class="tab" onclick="switchTab(this,'htab-slaughter')">Slaughter Eligibility</div>
         </div>
@@ -815,6 +816,56 @@ tbody tr:hover{background:var(--green-pale)}tbody td{padding:12px 16px;color:var
             </div>
             <div class="form-group"><label class="form-label">Body Temperature (°C)</label><input class="form-control" type="number" id="newHealthTemp" placeholder="38.5" step="0.1"/></div>
             <div class="form-group"><label class="form-label">Body Weight (kg)</label><input class="form-control" type="number" id="newHealthWeight" placeholder="e.g. 520"/></div>
+          </div>
+        </div>
+        <div id="htab-nutrition" class="tab-content">
+          <div class="card-subtitle" style="margin-bottom:20px">Record the animal's current feed programme, nutrition status, and growth milestones. (FR 1.3)</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Feed Type</label>
+              <select class="form-control" id="nutFeedType">
+                <option value="">-- Select --</option>
+                <option>Grass / Pasture</option>
+                <option>Hay</option>
+                <option>Silage</option>
+                <option>Concentrate / Pellets</option>
+                <option>Total Mixed Ration (TMR)</option>
+                <option>Grain-based</option>
+                <option>Milk Replacer (Calf)</option>
+                <option>Mixed Diet</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Daily Feed Amount (kg)</label>
+              <input class="form-control" type="number" id="nutFeedAmount" placeholder="e.g. 12.5" min="0" step="0.1"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nutrition Status</label>
+              <select class="form-control" id="nutStatus">
+                <option value="Optimal">Optimal</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+                <option value="Under-nourished">Under-nourished</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Record Date</label>
+              <input class="form-control" type="date" id="nutDate"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Growth Milestone</label>
+            <select class="form-control" id="nutGrowthMilestone">
+              <option value="">-- None / Not Applicable --</option>
+              <option>Weaning</option>
+              <option>First Calving</option>
+              <option>Peak Lactation Reached</option>
+              <option>Target Slaughter Weight Reached</option>
+              <option>Growth on Track</option>
+              <option>Below Target Weight</option>
+              <option>Above Target Weight</option>
+            </select>
           </div>
         </div>
         <div id="htab-repro" class="tab-content">
@@ -2102,6 +2153,9 @@ function startNewAnimal(){
     var el=document.getElementById(id); if(el) el.classList.remove('error');
   });
   buildWizard('wiz-animal-1',ANIMAL_STEPS,0);
+  // Reset nutrition tab fields
+  ['nutFeedType','nutStatus','nutGrowthMilestone'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['nutFeedAmount','nutDate'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   navigate('animal-create');
 }
 
@@ -2172,6 +2226,11 @@ function tryAnimalS1Next(){
 function prepAnimalReview(){
   const nextNum=String(db.cows.length+1).padStart(4,'0');
   const newId='C-'+nextNum;
+  const nutFeedType     = document.getElementById('nutFeedType')?.value||'—';
+  const nutFeedAmount   = document.getElementById('nutFeedAmount')?.value||'—';
+  const nutStatus       = document.getElementById('nutStatus')?.value||'—';
+  const nutDate         = document.getElementById('nutDate')?.value||'';
+  const nutMilestone    = document.getElementById('nutGrowthMilestone')?.value||'—';
   state.newAnimal={
     id:newId, name:document.getElementById('newAnimalName').value||'(Unnamed)',
     type:document.getElementById('newAnimalType').value, dob:document.getElementById('newAnimalDob').value,
@@ -2180,6 +2239,7 @@ function prepAnimalReview(){
     health:document.getElementById('newHealthStatus')?.value||'Good',
     pregnancy:'N/A', avgYield:0, slaughterEligible:document.getElementById('slaughterEligible')?.checked||false,
     healthHistory:[], milkYields:[], aiDate:'—', pregnancyNote:'—',
+    nutrition:{ feedType:nutFeedType, dailyAmount:nutFeedAmount, status:nutStatus, date:nutDate, milestone:nutMilestone }
   };
   document.getElementById('animalSummary').innerHTML=[
     summaryRow('Auto-Generated ID',`<strong>${newId}</strong>`),
@@ -2189,6 +2249,11 @@ function prepAnimalReview(){
     summaryRow('Birth Weight',state.newAnimal.weight+' kg'),
     summaryRow('Health Status',healthPillHtml(state.newAnimal.health)),
     summaryRow('Slaughter Eligible',state.newAnimal.slaughterEligible?badgeHtml('Yes','badge-amber'):'No (N/A)'),
+    summaryRow('Feed Type',nutFeedType),
+    summaryRow('Daily Feed Amount',nutFeedAmount!=='—'?nutFeedAmount+' kg':nutFeedAmount),
+    summaryRow('Nutrition Status',nutStatus),
+    summaryRow('Nutrition Record Date',nutDate?fmtDate(nutDate):'—'),
+    summaryRow('Growth Milestone',nutMilestone||'None'),
     summaryRow('Created By','Dr. (Current Veterinarian)'),
   ].join('');
   document.getElementById('animalConfirmCheck').checked=false;
