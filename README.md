@@ -1,28 +1,50 @@
-# Milkydeky Integrated Operations Platform
+# Milkydeky Integrated Operations Platform (MIOP)
 
-## Project Overview
+An academic **software development and systems analysis** project for a proposed dairy and meat operations management platform.
 
-An academic software development project focused on designing a web-based management platform for dairy farm operations.
+**Course:** ITCS224 Fundamental of Information System & Software Development, Mahidol University  
+**Year:** 2025  
+**Type:** Team project (4 active members at completion)
 
-The prototype covers animal care, harvesting, and dairy production management workflows.
+## Project overview
 
-## My Contributions
+MIOP is a prototype designed to connect dairy-farm workflows and make operational records easier to inspect. The documented prototype focuses on three core modules:
 
-- Independently developed the interactive web prototype using AI-assisted development.
-- Took primary responsibility for designing the Level 0 Data Flow Diagram (DFD).
-- Collaborated with team members on requirements analysis and software test cases.
+- **Manage Animal Care:** Animal profiles, health records, nutrition, reproduction, and eligibility information
+- **Manage Harvesting:** Milk and meat harvest forms, animal-ID checks, batch details, storage assignment, and confirmation screens
+- **Dairy & Meat Operations:** Production batches, raw-stock checks, quality inspection, machine alerts, and production-stage tracking
 
-## Project Deliverables
+The system is an **academic prototype**, not a deployed production farm-management service. Screens that refer to databases or notifications demonstrate proposed workflows; they do not by themselves establish that real backend integrations are deployed.
 
-- Interactive Web Prototype
-- Data Flow Diagrams
-- Requirements Analysis
-- Software Test Cases
+## My contributions
 
-## Development Approach
+- **Web prototype:** Built the interactive web prototype using **AI-assisted development**, taking responsibility for the prototype as a whole.
+- **System analysis:** Took primary responsibility for the **Level 0 Data Flow Diagram (DFD)**.
+- **Team collaboration:** Shared work on **requirements analysis** and **test cases** with team members.
 
-The web prototype was created using AI-assisted development, with a focus on interface design, workflow demonstration, and functional prototyping.
+Other diagrams and testing materials are project deliverables by the team. These are not presented as work independently authored by me.
 
-## Project Context
+## Demonstration and documentation
 
-Academic team project completed in 2025 as part of ITCS224 at Mahidol University.
+- **Prototype source:** [`index.html`](./index.html)
+- **Selected report extract:** [Structure Chart, DFD Level 0, Prototype Walkthrough & Test Cases (PDF)](./Milkydeky_Final_Structure_Chart_DFD_Prototype_TestCases.pdf)
+
+The PDF extract includes the functional decomposition diagram (Structure Chart), Level 0 DFD, screenshots and walkthroughs of the prototype, and selected happy-path and unhappy-path test-case documentation from the completed project report. It is a **selected extract**, not the full report.
+
+### What to look for in the PDF
+
+1. **Structure Chart and DFD Level 0** — high-level functional breakdown and system data exchanges.
+2. **Dashboard and Harvesting** — navigation, milk/meat harvest workflows, validations, and storage selection.
+3. **Dairy & Meat Operations** — production-batch progress and quality-inspection workflows.
+4. **Animal Care** — animal-profile creation and record views.
+5. **Test Cases** — documented scenarios, expected/actual results, and outcomes in the selected report pages.
+
+## Implementation approach
+
+The web prototype was developed with AI assistance. The project emphasized demonstrating business workflows, user interactions, requirements, and test scenarios. The available `index.html` is the prototype source; the report is supporting documentation.
+
+## Academic context and attribution
+
+This was a collaborative university course project. Individual contributions are described above to distinguish my work from the team's shared output.
+
+**Note:** Please obtain the team's/course permission before redistributing or reusing any report content outside the intended portfolio context.
